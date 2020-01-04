@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
+# Last modified: Aug 6, 2020
+
 import wx
 import wx.adv
+import settings_dlg
+
 
 MAX_FOLDER_NUMBER = 5
 
@@ -29,6 +33,9 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         pass
 
     def OnMenu(self, Event, index):
+        """
+        Open the selected folder in Explorer.
+        """
         msg = u"打开目录#" + str(index)
         wx.MessageBox(msg)
 
@@ -39,6 +46,10 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         return menu
 
     def getMenuAttrs(self):
+        """
+        Generate menu items from file.
+        If the file is empty or corrupted, open Settings dialog.
+        """
         MenuAttrs = []
         for ii in range(0, MAX_FOLDER_NUMBER):
             MenuAttrs.append((u'打开目录#' + str(ii), self.id_folder[ii]))
@@ -61,5 +72,13 @@ class MyApp(wx.App):
 
 
 if __name__ == "__main__":
-    app = MyApp()
+    '''Debug Main Frame'''
+    #app = MyApp()
+    
+    '''Debug settings dialog'''
+    app = wx.App(False)
+    dlg = settings_dlg.SettingsDialog(None)
+    dlg.Show(True)
+
+    #start the applications 
     app.MainLoop()
