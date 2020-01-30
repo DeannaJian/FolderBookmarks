@@ -66,23 +66,7 @@ class SettingsDialog ( wx.Dialog ):
 
         self.Centre( wx.BOTH )
 
-        # Connect Events
-        self.Bind( wx.EVT_SHOW, self.ShowSettingsDialog )
-        self.m_buttonSave.Bind( wx.EVT_BUTTON, self.SaveSelection )
-        self.m_buttonCancel.Bind( wx.EVT_BUTTON, self.CancelSaving )
-
     def __del__( self ):
-        pass
-
-
-    # Virtual event handlers, overide them in your derived class
-    def ShowSettingsDialog( self, event ):
-        pass
-
-    def SaveSelection( self, event ):
-        pass
-
-    def CancelSaving( self, event ):
         pass
 
 

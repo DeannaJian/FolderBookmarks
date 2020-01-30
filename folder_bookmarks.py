@@ -4,9 +4,10 @@
 import wx
 import wx.adv
 import settings_dlg
-
+import pickle
 
 MAX_FOLDER_NUMBER = 5
+favorate_folders = []
 
 
 class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
@@ -30,6 +31,11 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         wx.Exit()
 
     def onSettings(self, event):
+        '''
+        dlg = MySettingsDlg(None)
+        dlg.ShowSettingsDialog()
+        dlg.Show(True)
+        '''
         pass
 
     def OnMenu(self, Event, index):
@@ -71,14 +77,53 @@ class MyApp(wx.App):
         return True
 
 
+class MySettingsDlg(settings_dlg.SettingsDialog):
+    """
+        Dialog for picking favorate folders.
+    """
+
+    def ShowSettingsDialog(self):
+        """
+           Read current favorates from file.
+        """
+        self.m_dirPicker1.SetPath(favorate_folders[0])
+        self.m_dirPicker2.SetPath(favorate_folders[1])
+        self.m_dirPicker3.SetPath(favorate_folders[2])
+        self.m_dirPicker4.SetPath(favorate_folders[3])
+        self.m_dirPicker5.SetPath(favorate_folders[4])
+
+    def SaveSelection(self, event):
+        """
+            Save current selection as favorate folders.
+        """
+        temp_favorates = []
+        temp_favorates.append(self.m_dirPicker1.GetPath())
+        temp_favorates.append(self.m_dirPicker2.GetPath())
+        temp_favorates.append(self.m_dirPicker3.GetPath())
+        temp_favorates.append(self.m_dirPicker4.GetPath())
+        temp_favorates.append(self.m_dirPicker5.GetPath())
+
+        with open('favorate_folders.pkl', 'wb') as ff:
+            pickle.dump(temp_favorates, ff)
+
+        self.Show(False)
+
+    def CancelSaving(self, event):
+        self.Show(False)
+
+
 if __name__ == "__main__":
     '''Debug Main Frame'''
-    #app = MyApp()
-    
-    '''Debug settings dialog'''
+    app = MyApp()
+    with open('favorate_folders.pkl', 'rb') as ff:
+        favorate_folders = pickle.load(ff)
+
+    '''
     app = wx.App(False)
-    dlg = settings_dlg.SettingsDialog(None)
+    dlg = MySettingsDlg(None)
+    dlg.ShowSettingsDialog()
     dlg.Show(True)
+    '''
 
     #start the applications 
     app.MainLoop()
