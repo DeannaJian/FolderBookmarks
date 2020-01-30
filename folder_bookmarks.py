@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Last modified: Aug 6, 2020
+# Last modified: Jan 30, 2020
 
 import wx
 import wx.adv
@@ -20,6 +20,8 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         wx.adv.TaskBarIcon.__init__(self)
         self.SetIcon(wx.Icon(self.ICON), self.TITLE)
 
+        self.settingsdlg = MySettingsDlg(None)
+
         self.Bind(wx.EVT_MENU, self.onExit, id=self.ID_EXIT)
         self.Bind(wx.EVT_MENU, self.onSettings, id=self.ID_SETTINGS)
         for ii in range(0, MAX_FOLDER_NUMBER):
@@ -31,19 +33,16 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         wx.Exit()
 
     def onSettings(self, event):
-        '''
-        dlg = MySettingsDlg(None)
-        dlg.ShowSettingsDialog()
-        dlg.Show(True)
-        '''
-        pass
+        self.settingsdlg.SetSettingsDialog()
+        self.settingsdlg.Show(True)
 
     def OnMenu(self, Event, index):
         """
         Open the selected folder in Explorer.
         """
-        msg = u"打开目录#" + str(index)
-        wx.MessageBox(msg)
+        import os
+
+        os.system("start explorer %s" % favorate_folders[index])
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
@@ -51,16 +50,24 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
             menu.Append(mentAttr[1], mentAttr[0])
         return menu
 
+    def StripPathString(self, path):
+        if len(path) > 15:
+            path = path[0:6] + '...' + path[-6:-1]
+
+        return path
+
     def getMenuAttrs(self):
         """
-        Generate menu items from file.
-        If the file is empty or corrupted, open Settings dialog.
+        Generate menu items.
         """
         MenuAttrs = []
         for ii in range(0, MAX_FOLDER_NUMBER):
-            MenuAttrs.append((u'打开目录#' + str(ii), self.id_folder[ii]))
+            if favorate_folders[ii]:
+                MenuAttrs.append((self.StripPathString(favorate_folders[ii]),
+                                  self.id_folder[ii]))
+                # print(self.StripPathString(favorate_folders[ii]))
 
-        MenuAttrs.append(('设置', self.ID_EXIT))
+        MenuAttrs.append(('设置', self.ID_SETTINGS))
         MenuAttrs.append(('退出', self.ID_EXIT))
         return MenuAttrs
 
@@ -82,7 +89,7 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
         Dialog for picking favorate folders.
     """
 
-    def ShowSettingsDialog(self):
+    def SetSettingsDialog(self):
         """
            Read current favorates from file.
         """
@@ -96,15 +103,15 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
         """
             Save current selection as favorate folders.
         """
-        temp_favorates = []
-        temp_favorates.append(self.m_dirPicker1.GetPath())
-        temp_favorates.append(self.m_dirPicker2.GetPath())
-        temp_favorates.append(self.m_dirPicker3.GetPath())
-        temp_favorates.append(self.m_dirPicker4.GetPath())
-        temp_favorates.append(self.m_dirPicker5.GetPath())
+        favorate_folders.clear()
+        favorate_folders.append(self.m_dirPicker1.GetPath())
+        favorate_folders.append(self.m_dirPicker2.GetPath())
+        favorate_folders.append(self.m_dirPicker3.GetPath())
+        favorate_folders.append(self.m_dirPicker4.GetPath())
+        favorate_folders.append(self.m_dirPicker5.GetPath())
 
         with open('favorate_folders.pkl', 'wb') as ff:
-            pickle.dump(temp_favorates, ff)
+            pickle.dump(favorate_folders, ff)
 
         self.Show(False)
 
@@ -113,17 +120,8 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
 
 
 if __name__ == "__main__":
-    '''Debug Main Frame'''
-    app = MyApp()
     with open('favorate_folders.pkl', 'rb') as ff:
         favorate_folders = pickle.load(ff)
 
-    '''
-    app = wx.App(False)
-    dlg = MySettingsDlg(None)
-    dlg.ShowSettingsDialog()
-    dlg.Show(True)
-    '''
-
-    #start the applications 
+    app = MyApp()
     app.MainLoop()
