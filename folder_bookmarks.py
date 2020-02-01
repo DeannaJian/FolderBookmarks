@@ -34,6 +34,10 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         wx.Exit()
 
     def onSettings(self, event):
+        """
+        Update folder selection in the Settings Dialog and
+        show it.
+        """
         self.settingsdlg.SetSettingsDialog()
         self.settingsdlg.Show(True)
 
@@ -52,6 +56,9 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         return menu
 
     def StripPathString(self, path):
+        """
+        Utility function used to shorten path string.
+        """
         if len(path) > 15:
             path = path[0:6] + '...' + path[-6:]
 
@@ -66,7 +73,6 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
             if favorate_folders[ii]:
                 MenuAttrs.append((self.StripPathString(favorate_folders[ii]),
                                   self.id_folder[ii]))
-                # print(self.StripPathString(favorate_folders[ii]))
 
         MenuAttrs.append(('设置', self.ID_SETTINGS))
         MenuAttrs.append(('退出', self.ID_EXIT))
@@ -92,7 +98,7 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
 
     def SetSettingsDialog(self):
         """
-           Read current favorates from file.
+           Display selected folder paths in dirpickers.
         """
         self.m_dirPicker1.SetPath(favorate_folders[0])
         self.m_dirPicker2.SetPath(favorate_folders[1])
@@ -102,7 +108,7 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
 
     def SaveSelection(self, event):
         """
-            Save current selection as favorate folders.
+            Save current selection as favorate folders and file.
         """
         favorate_folders.clear()
         favorate_folders.append(self.m_dirPicker1.GetPath())
