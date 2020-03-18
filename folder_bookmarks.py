@@ -47,7 +47,7 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         """
         import os
 
-        os.system("start explorer %s" % favorate_folders[index])
+        os.startfile(favorate_folders[index])
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
