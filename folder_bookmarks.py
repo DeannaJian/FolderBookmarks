@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# Last modified: June 25, 2020
+# Last modified: Feb. 1, 2020
+# Author: deanna.net@163.com
 
 import wx
 import wx.adv
 import settings_dlg
 import pickle
-import os
 
 MAX_FOLDER_NUMBER = 5
 favorate_folders = []
@@ -34,7 +34,10 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         wx.Exit()
 
     def onSettings(self, event):
-        self.settingsdlg.m_dirPicker1.SetFocus()
+        """
+        Update folder selection in the Settings Dialog and
+        show it.
+        """
         self.settingsdlg.SetSettingsDialog()
         self.settingsdlg.Show(True)
 
@@ -44,7 +47,7 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         """
         import os
 
-        os.system("start explorer %s" % favorate_folders[index])
+        os.startfile(favorate_folders[index])
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
@@ -53,9 +56,11 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         return menu
 
     def StripPathString(self, path):
-        if len(path) > 20:
-            len_last_part = min(path.rfind('\\'), 10)
-            path = path[0:(22 - len_last_part)] + '...' + path[-len_last_part:]
+        """
+        Utility function used to shorten path string.
+        """
+        if len(path) > 15:
+            path = path[0:6] + '...' + path[-6:]
 
         return path
 
@@ -68,7 +73,6 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
             if favorate_folders[ii]:
                 MenuAttrs.append((self.StripPathString(favorate_folders[ii]),
                                   self.id_folder[ii]))
-                # print(self.StripPathString(favorate_folders[ii]))
 
         MenuAttrs.append(('设置', self.ID_SETTINGS))
         MenuAttrs.append(('退出', self.ID_EXIT))
@@ -94,27 +98,24 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
 
     def SetSettingsDialog(self):
         """
-           Read current favorates from file.
+           Display selected folder paths in dirpickers.
         """
-        self.pickers = (self.m_dirPicker1, self.m_dirPicker2,
-                        self.m_dirPicker3, self.m_dirPicker4,
-                        self.m_dirPicker5)
-
-        for ii in range(0, MAX_FOLDER_NUMBER):
-            self.pickers[ii].SetPath(favorate_folders[ii])
+        self.m_dirPicker1.SetPath(favorate_folders[0])
+        self.m_dirPicker2.SetPath(favorate_folders[1])
+        self.m_dirPicker3.SetPath(favorate_folders[2])
+        self.m_dirPicker4.SetPath(favorate_folders[3])
+        self.m_dirPicker5.SetPath(favorate_folders[4])
 
     def SaveSelection(self, event):
         """
-            Save current selection as favorate folders.
+            Save current selection as favorate folders and file.
         """
         favorate_folders.clear()
-
-        for ii in range(0, MAX_FOLDER_NUMBER):
-            folder_path = self.pickers[ii].GetPath()
-            if (os.path.exists(folder_path)):
-                favorate_folders.append(folder_path)
-            else:
-                favorate_folders[ii] = ''
+        favorate_folders.append(self.m_dirPicker1.GetPath())
+        favorate_folders.append(self.m_dirPicker2.GetPath())
+        favorate_folders.append(self.m_dirPicker3.GetPath())
+        favorate_folders.append(self.m_dirPicker4.GetPath())
+        favorate_folders.append(self.m_dirPicker5.GetPath())
 
         with open('favorate_folders.pkl', 'wb') as ff:
             pickle.dump(favorate_folders, ff)
@@ -124,60 +125,10 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
     def CancelSaving(self, event):
         self.Show(False)
 
-    def move_item_down(self, item_index, direction):
-        """
-            Move item content (folder path) up or down.
-        """
-        assert direction in ('down', 'up')
-
-        if direction == 'down':
-            dir_picker_a = self.pickers[item_index - 1]
-            dir_picker_b = self.pickers[item_index]
-        else:
-            dir_picker_a = self.pickers[item_index - 1]
-            dir_picker_b = self.pickers[item_index - 2]
-
-        temp_path = dir_picker_a.GetPath()
-        dir_picker_a.SetPath(dir_picker_b.GetPath())
-        dir_picker_b.SetPath(temp_path)
-
-    def item1_down(self, event):
-        self.move_item_down(1, 'down')
-
-    def item2_down(self, event):
-        self.move_item_down(2, 'down')
-
-    def item3_down(self, event):
-        self.move_item_down(3, 'down')
-
-    def item4_down(self, event):
-        self.move_item_down(4, 'down')
-
-    def item2_up(self, event):
-        self.move_item_down(2, 'up')
-
-    def item3_up(self, event):
-        self.move_item_down(3, 'up')
-
-    def item4_up(self, event):
-        self.move_item_down(4, 'up')
-
-    def item5_up(self, event):
-        self.move_item_down(5, 'up')
-
 
 if __name__ == "__main__":
-    current_path = os.getcwd()
-
-    if not (os.path.exists('favorate_folders.pkl')):
-        for ii in range(0, MAX_FOLDER_NUMBER):
-            favorate_folders.append(current_path)
-    else:
-        with open('favorate_folders.pkl', 'rb') as ff:
-            favorate_folders = pickle.load(ff)
-        for ii in range(0, MAX_FOLDER_NUMBER):
-            if not (os.path.exists(favorate_folders[ii])):
-                favorate_folders[ii] = ''
+    with open('favorate_folders.pkl', 'rb') as ff:
+        favorate_folders = pickle.load(ff)
 
     app = MyApp()
     app.MainLoop()
