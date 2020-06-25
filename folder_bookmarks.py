@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Last modified: Jan 30, 2020
+# Last modified: June 25, 2020
 
 import wx
 import wx.adv
@@ -51,8 +51,9 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         return menu
 
     def StripPathString(self, path):
-        if len(path) > 15:
-            path = path[0:6] + '...' + path[-6:-1]
+        if len(path) > 20:
+            len_last_part = min(path.rfind('\\'), 10)
+            path = path[0:(22 - len_last_part)] + '...' + path[-len_last_part:]
 
         return path
 
