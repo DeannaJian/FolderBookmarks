@@ -44,7 +44,7 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         """
         import os
 
-        os.system("start explorer %s" % favorate_folders[index])
+        os.startfile(favorate_folders[index])
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
@@ -114,9 +114,9 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
             if (os.path.exists(folder_path)):
                 favorate_folders.append(folder_path)
             else:
-                favorate_folders[ii] = ''
+                favorate_folders.append('')
 
-        with open('favorate_folders.pkl', 'wb') as ff:
+        with open(os.path.abspath('.') + '\\favorate_folders.pkl', 'wb') as ff:
             pickle.dump(favorate_folders, ff)
 
         self.Show(False)
@@ -168,12 +168,13 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
 
 if __name__ == "__main__":
     current_path = os.getcwd()
+    settings_file = os.path.abspath('.') + '\\favorate_folders.pkl'
 
-    if not (os.path.exists('favorate_folders.pkl')):
+    if not (os.path.exists(settings_file)):
         for ii in range(0, MAX_FOLDER_NUMBER):
             favorate_folders.append(current_path)
     else:
-        with open('favorate_folders.pkl', 'rb') as ff:
+        with open(settings_file, 'rb') as ff:
             favorate_folders = pickle.load(ff)
         for ii in range(0, MAX_FOLDER_NUMBER):
             if not (os.path.exists(favorate_folders[ii])):
