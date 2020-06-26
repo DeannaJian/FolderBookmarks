@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Last modified: June 25, 2020
+# Last modified: June 26, 2020
 
 import wx
 import wx.adv
@@ -18,7 +18,8 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
     id_folder = [0] * MAX_FOLDER_NUMBER
 
     def __init__(self):
-        wx.adv.TaskBarIcon.__init__(self)
+        super().__init__()
+
         self.SetIcon(wx.Icon(self.ICON), self.TITLE)
 
         self.settingsdlg = MySettingsDlg(None)
@@ -42,8 +43,6 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
         """
         Open the selected folder in Explorer.
         """
-        import os
-
         os.startfile(favorate_folders[index])
 
     def CreatePopupMenu(self):
@@ -68,7 +67,6 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
             if favorate_folders[ii]:
                 MenuAttrs.append((self.StripPathString(favorate_folders[ii]),
                                   self.id_folder[ii]))
-                # print(self.StripPathString(favorate_folders[ii]))
 
         MenuAttrs.append(('设置', self.ID_SETTINGS))
         MenuAttrs.append(('退出', self.ID_EXIT))
@@ -77,7 +75,7 @@ class FolderBookmarkTaskBarIcon(wx.adv.TaskBarIcon):
 
 class MyFrame(wx.Frame):
     def __init__(self):
-        wx.Frame.__init__(self)
+        super().__init__()
         FolderBookmarkTaskBarIcon()
 
 
@@ -92,14 +90,17 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
         Dialog for picking favorate folders.
     """
 
-    def SetSettingsDialog(self):
-        """
-           Read current favorates from file.
-        """
+    def __init__(self, parent):
+        super().__init__(parent)
+
         self.pickers = (self.m_dirPicker1, self.m_dirPicker2,
                         self.m_dirPicker3, self.m_dirPicker4,
                         self.m_dirPicker5)
 
+    def SetSettingsDialog(self):
+        """
+           Read current favorates from file.
+        """
         for ii in range(0, MAX_FOLDER_NUMBER):
             self.pickers[ii].SetPath(favorate_folders[ii])
 
@@ -114,9 +115,11 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
             if (os.path.exists(folder_path)):
                 favorate_folders.append(folder_path)
             else:
+                wx.MessageBox('目录不存在：%s。 不保存该目录。' % folder_path,
+                              '提示', wx.OK | wx.ICON_INFORMATION)
                 favorate_folders.append('')
 
-        with open(os.path.abspath('.') + '\\favorate_folders.pkl', 'wb') as ff:
+        with open('favorate_folders.pkl', 'wb') as ff:
             pickle.dump(favorate_folders, ff)
 
         self.Show(False)
@@ -167,12 +170,12 @@ class MySettingsDlg(settings_dlg.SettingsDialog):
 
 
 if __name__ == "__main__":
-    current_path = os.getcwd()
-    settings_file = os.path.abspath('.') + '\\favorate_folders.pkl'
+    # Initialize the favorate folder list
+    settings_file = 'favorate_folders.pkl'
 
     if not (os.path.exists(settings_file)):
-        for ii in range(0, MAX_FOLDER_NUMBER):
-            favorate_folders.append(current_path)
+        current_path = os.getcwd()
+        favorate_folders = [current_path] * MAX_FOLDER_NUMBER
     else:
         with open(settings_file, 'rb') as ff:
             favorate_folders = pickle.load(ff)
